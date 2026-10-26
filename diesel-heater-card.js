@@ -318,16 +318,16 @@ class DieselHeaterCard extends HTMLElement {
           <div class="status"><ha-icon></ha-icon><span></span></div>
         </div>
         <div class="body">
-          <div class="outputs">
-            <div class="out" id="outFan">${ICON_FAN}<div><b>0%</b><small>Fan</small></div></div>
-            <div class="out" id="outGlow">${ICON_GLOW}<div><b>Off</b><small>Glow plug</small></div></div>
-            <div class="out" id="outPump">${ICON_PUMP}<div><b>0.00 Hz</b><small>Fuel pump</small></div></div>
-          </div>
           <div class="hero-block">
             <div class="ring"><div class="ring-in">
               <div class="big"><span id="bigCore">--</span><span class="u">°C</span></div>
               <div class="ring-l">Core temp</div>
             </div></div>
+          </div>
+          <div class="outputs">
+            <div class="out" id="outFan">${ICON_FAN}<div><b>0%</b><small>Fan</small></div></div>
+            <div class="out" id="outGlow">${ICON_GLOW}<div><b>Off</b><small>Glow plug</small></div></div>
+            <div class="out" id="outPump">${ICON_PUMP}<div><b>0.00 Hz</b><small>Fuel pump</small></div></div>
           </div>
           <div class="tiles">
             <div class="tile core"><div><span class="v" id="core">--</span><span class="u">°C</span></div><div class="l">Core temp</div></div>
