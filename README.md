@@ -16,12 +16,12 @@ It needs the **[Diesel Heater Controller integration](https://github.com/horizon
 
 | Screenshot 1 | Screenshot 2 | Screenshot 3 |
 |---|---|---|
-| ![Screenshot 1](https://raw.githubusercontent.com/horizon10t/diesel-heater-card/main/images/screenshot_1.png) | ![Screenshot 2](https://raw.githubusercontent.com/horizon10t/diesel-heater-card/main/images/screenshot_2.png) | ![Screenshot 3](https://raw.githubusercontent.com/horizon10t/diesel-heater-card/main/images/screenshot_3.png) |
+| ![Screenshot 1](https://raw.githubusercontent.com/horizon10t/diesel-heater-lovelace/main/images/screenshot_1.png) | ![Screenshot 2](https://raw.githubusercontent.com/horizon10t/diesel-heater-lovelace/main/images/screenshot_2.png) | ![Screenshot 3](https://raw.githubusercontent.com/horizon10t/diesel-heater-lovelace/main/images/screenshot_3.png) |
 
 ## Install with HACS
 
 1. In Home Assistant open **HACS**, then the three-dot menu (top right) > **Custom repositories**.
-2. Add `https://github.com/horizon10t/diesel-heater-card` with category **Dashboard** (older HACS versions call it **Lovelace**) and click **Add**.
+2. Add `https://github.com/horizon10t/diesel-heater-lovelace` with category **Dashboard** (older HACS versions call it **Lovelace**) and click **Add**.
 3. Search for **Diesel Heater Card** in HACS, open it and click **Download**.
 4. Hard-refresh the browser (Ctrl+F5). HACS adds the dashboard resource for you, so there is nothing to configure by hand.
 
@@ -51,7 +51,7 @@ Open the browser console (F12) after a hard refresh and run:
 !!customElements.get('diesel-heater-card')
 ```
 
-`false` means the resource is not loaded. Check **Settings > Dashboards > Resources** (turn on Advanced mode in your profile) for `/hacsfiles/diesel-heater-card/diesel-heater-card.js`.
+`false` means the resource is not loaded. Check **Settings > Dashboards > Resources** (turn on Advanced mode in your profile) for `/hacsfiles/diesel-heater-lovelace/diesel-heater-card.js`.
 
 ## Layouts
 

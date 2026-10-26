@@ -597,6 +597,6 @@ if (!customElements.get("diesel-heater-card")) {
     name: "Diesel Heater",
     preview: true,
     description: "Status, core temperature, volts/amps, outputs and mode control for the ESP32 diesel heater controller. 10 layouts.",
-    documentationURL: "https://github.com/horizon10t/diesel-heater-card",
+    documentationURL: "https://github.com/horizon10t/diesel-heater-lovelace",
   });
 }
