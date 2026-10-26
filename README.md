@@ -1,8 +1,14 @@
 # Diesel Heater Card
 
-A Lovelace card for the ESP32-S3 diesel heater controller. It shows the heater status, core temperature, volts and amps, a Thermostat/Power mode toggle with the matching slider, and a start/stop button.
+A Lovelace card for the ESP32-S3 diesel heater controller.
 
-It needs the **[Diesel Heater Controller integration](https://github.com/horizon10t/diesel-heater-ha)** installed and set up first, because the card reads that integration's entities.
+- Status, core temperature, volts and amps
+- **Fan, glow plug and fuel pump** output indicators (orange when active, like the controller WebUI)
+- Thermostat / Power mode toggle with a **target / power-level slider and + / - buttons**
+- **Stop heater** and, while the heater is running, a red **Emergency stop** button
+- **10 selectable layouts** chosen in the card editor
+
+It needs the **[Diesel Heater Controller integration](https://github.com/horizon10t/diesel-heater-ha) version 1.4.0 or newer** installed and set up first (the emergency stop button and output sensors come from it), and the controller firmware flashed with the latest version.
 
 ## Install with HACS
 
@@ -38,3 +44,22 @@ Open the browser console (F12) after a hard refresh and run:
 ```
 
 `false` means the resource is not loaded. Check **Settings > Dashboards > Resources** (turn on Advanced mode in your profile) for `/hacsfiles/diesel-heater-card/diesel-heater-card.js`.
+
+## Layouts
+
+Choose one in the card editor under **Layout** (or `layout:` in YAML).
+
+| `layout` | Style |
+|---|---|
+| `classic` | Stacked tiles (default) |
+| `compact` | Dense and small |
+| `hero` | Large core temperature |
+| `split` | Readings on the left, controls on the right |
+| `minimal` | Clean list, no tiles |
+| `gauge` | Temperature ring |
+| `banner` | Coloured status bar across the top |
+| `accent` | Colour-edged cards |
+| `wide` | Horizontal strip (best on full-width cards) |
+| `console` | Dark instrument-panel look |
+
+Other options: `show_outputs: false` hides the fan / glow / pump row, and `show_estop: false` hides the emergency stop button.
