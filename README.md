@@ -10,6 +10,14 @@ A Lovelace card for the ESP32-S3 diesel heater controller.
 
 It needs the **[Diesel Heater Controller integration](https://github.com/horizon10t/diesel-heater-ha) version 1.4.0 or newer** installed and set up first (the emergency stop button and output sensors come from it), and the controller firmware flashed with the latest version.
 
+## Screenshots
+
+<!-- Replace the three files in the images/ folder with your screenshots (keep the same file names). -->
+
+| Screenshot 1 | Screenshot 2 | Screenshot 3 |
+|---|---|---|
+| ![Screenshot 1](https://raw.githubusercontent.com/horizon10t/diesel-heater-card/main/images/screenshot_1.png) | ![Screenshot 2](https://raw.githubusercontent.com/horizon10t/diesel-heater-card/main/images/screenshot_2.png) | ![Screenshot 3](https://raw.githubusercontent.com/horizon10t/diesel-heater-card/main/images/screenshot_3.png) |
+
 ## Install with HACS
 
 1. In Home Assistant open **HACS**, then the three-dot menu (top right) > **Custom repositories**.
