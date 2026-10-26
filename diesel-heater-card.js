@@ -112,16 +112,16 @@ const CARD_CSS = `
   .tile .l { font-size:.75rem; color:var(--secondary-text-color); margin-top:2px; }
   .tile.core .v { color:var(--accent, inherit); }
 
-  .outputs { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-  .out { display:flex; align-items:center; justify-content:center; gap:10px; padding:12px 8px; border-radius:12px;
-    background:var(--secondary-background-color); color:var(--primary-text-color); transition:background .2s,color .2s; min-width:0; }
-  .out svg { width:24px; height:24px; flex:0 0 24px; color:var(--secondary-text-color); transition:.2s; }
-  .out b { display:block; font-size:.95rem; white-space:nowrap; }
-  .out small { display:block; margin-top:2px; font-size:.6rem; text-transform:uppercase; letter-spacing:.09em; color:var(--secondary-text-color); }
+  .outputs { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .out { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:18px 6px 14px;
+    border-radius:14px; text-align:center; background:var(--secondary-background-color); color:var(--primary-text-color);
+    transition:background .2s,color .2s; min-width:0; }
+  .out svg { width:44px; height:44px; flex:0 0 44px; color:var(--secondary-text-color); transition:.2s; }
+  .out b { display:block; font-size:1.1rem; white-space:nowrap; }
+  .out small { display:block; margin-top:3px; font-size:.65rem; text-transform:uppercase; letter-spacing:.09em; color:var(--secondary-text-color); }
   .out.on { background:linear-gradient(135deg,#f26826,#ff873e); color:#fff; }
   .out.on svg, .out.on small { color:#fff; }
-  .out.on svg { filter:drop-shadow(0 0 6px #fff8); }
-  @container (max-width:360px) { .out { flex-direction:column; gap:4px; text-align:center; } }
+  .out.on svg { filter:drop-shadow(0 0 8px #fff8); }
 
   .controls { display:flex; flex-direction:column; gap:14px; min-width:0; }
   .seg { display:grid; grid-template-columns:1fr 1fr; background:var(--secondary-background-color); border-radius:12px; padding:4px; gap:4px; }
@@ -155,9 +155,10 @@ const CARD_CSS = `
   [data-layout=compact] .tile { padding:6px 4px; border-radius:8px; }
   [data-layout=compact] .tile .v { font-size:1.1rem; }
   [data-layout=compact] .tile .l { font-size:.65rem; }
-  [data-layout=compact] .out { padding:6px; gap:6px; border-radius:8px; }
-  [data-layout=compact] .out svg { width:18px; height:18px; flex-basis:18px; }
-  [data-layout=compact] .out b { font-size:.8rem; }
+  [data-layout=compact] .outputs { gap:6px; }
+  [data-layout=compact] .out { padding:8px 4px; gap:3px; border-radius:8px; }
+  [data-layout=compact] .out svg { width:26px; height:26px; flex-basis:26px; }
+  [data-layout=compact] .out b { font-size:.85rem; }
   [data-layout=compact] .out small { display:none; }
   [data-layout=compact] .seg button { padding:6px; }
   [data-layout=compact] .actions button { padding:8px; }
@@ -178,8 +179,10 @@ const CARD_CSS = `
   [data-layout=split] .tiles { grid-column:1; grid-template-columns:1fr; gap:6px; }
   [data-layout=split] .tile { display:flex; flex-direction:row-reverse; justify-content:space-between; align-items:center; text-align:left; padding:10px 12px; }
   [data-layout=split] .tile .l { margin:0; font-size:.85rem; }
-  [data-layout=split] .outputs { grid-column:1; grid-template-columns:1fr; gap:6px; }
-  [data-layout=split] .out { justify-content:flex-start; padding:8px 12px; }
+  [data-layout=split] .outputs { grid-column:1; gap:6px; }
+  [data-layout=split] .out { padding:12px 2px 10px; }
+  [data-layout=split] .out svg { width:32px; height:32px; flex-basis:32px; }
+  [data-layout=split] .out b { font-size:.9rem; }
   [data-layout=split] .controls { grid-column:2; grid-row:1 / span 3; }
   [data-layout=split] .fault { grid-column:1 / -1; }
   [data-layout=split] .row { flex-wrap:wrap; }
@@ -196,7 +199,7 @@ const CARD_CSS = `
   [data-layout=minimal] .tile { background:none; border-radius:0; display:flex; flex-direction:row-reverse; justify-content:space-between;
     align-items:baseline; padding:8px 0; border-bottom:1px solid var(--divider-color); text-align:left; }
   [data-layout=minimal] .tile .l { margin:0; font-size:.9rem; }
-  [data-layout=minimal] .outputs { display:flex; gap:20px; justify-content:flex-start; flex-wrap:wrap; }
+  [data-layout=minimal] .outputs { display:flex; gap:20px; justify-content:space-around; flex-wrap:wrap; }
   [data-layout=minimal] .out { background:none; padding:0; border-radius:0; }
   [data-layout=minimal] .out.on { background:none; color:#f26826; }
   [data-layout=minimal] .out.on svg { color:#f26826; filter:none; }
@@ -219,15 +222,16 @@ const CARD_CSS = `
 
   /* 8. accent */
   [data-layout=accent] .tile { border-left:4px solid var(--st); border-radius:8px; text-align:left; padding-left:12px; box-shadow:0 1px 3px rgba(0,0,0,.25); }
-  [data-layout=accent] .out { border-left:4px solid var(--divider-color); border-radius:8px; justify-content:flex-start; box-shadow:0 1px 3px rgba(0,0,0,.25); }
-  [data-layout=accent] .out.on { border-left-color:#ffd9c2; }
+  [data-layout=accent] .out { border-top:4px solid var(--divider-color); border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,.25); }
+  [data-layout=accent] .out.on { border-top-color:#ffd9c2; }
   [data-layout=accent] .seg, [data-layout=accent] .actions button { border-radius:8px; }
 
   /* 9. wide */
   [data-layout=wide] .body { flex-direction:row; flex-wrap:wrap; align-items:center; }
   [data-layout=wide] .tiles { flex:1 1 240px; }
   [data-layout=wide] .outputs { flex:1 1 240px; }
-  [data-layout=wide] .out { flex-direction:column; gap:4px; text-align:center; padding:10px 4px; }
+  [data-layout=wide] .out { padding:12px 4px 10px; }
+  [data-layout=wide] .out svg { width:36px; height:36px; flex-basis:36px; }
   [data-layout=wide] .controls { flex:2 1 300px; }
   [data-layout=wide] .fault { flex:1 1 100%; }
 
@@ -314,6 +318,11 @@ class DieselHeaterCard extends HTMLElement {
           <div class="status"><ha-icon></ha-icon><span></span></div>
         </div>
         <div class="body">
+          <div class="outputs">
+            <div class="out" id="outFan">${ICON_FAN}<div><b>0%</b><small>Fan</small></div></div>
+            <div class="out" id="outGlow">${ICON_GLOW}<div><b>Off</b><small>Glow plug</small></div></div>
+            <div class="out" id="outPump">${ICON_PUMP}<div><b>0.00 Hz</b><small>Fuel pump</small></div></div>
+          </div>
           <div class="hero-block">
             <div class="ring"><div class="ring-in">
               <div class="big"><span id="bigCore">--</span><span class="u">°C</span></div>
@@ -324,11 +333,6 @@ class DieselHeaterCard extends HTMLElement {
             <div class="tile core"><div><span class="v" id="core">--</span><span class="u">°C</span></div><div class="l">Core temp</div></div>
             <div class="tile"><div><span class="v" id="volt">--</span><span class="u">V</span></div><div class="l">Voltage</div></div>
             <div class="tile"><div><span class="v" id="amp">--</span><span class="u">A</span></div><div class="l">Current</div></div>
-          </div>
-          <div class="outputs">
-            <div class="out" id="outFan">${ICON_FAN}<div><b>0%</b><small>Fan</small></div></div>
-            <div class="out" id="outGlow">${ICON_GLOW}<div><b>Off</b><small>Glow plug</small></div></div>
-            <div class="out" id="outPump">${ICON_PUMP}<div><b>0.00 Hz</b><small>Fuel pump</small></div></div>
           </div>
           <div class="controls">
             <div class="seg">
