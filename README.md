@@ -53,13 +53,13 @@ Choose one in the card editor under **Layout** (or `layout:` in YAML).
 |---|---|
 | `classic` | Stacked tiles (default) |
 | `compact` | Dense and small |
-| `hero` | Large core temperature |
+| `hero` | Large cabin temperature |
 | `split` | Readings on the left, controls on the right |
 | `minimal` | Clean list, no tiles |
-| `gauge` | Temperature ring |
+| `gauge` | Cabin temperature ring |
 | `banner` | Coloured status bar across the top |
 | `accent` | Colour-edged cards |
 | `wide` | Horizontal strip (best on full-width cards) |
 | `console` | Dark instrument-panel look |
 
-Other options: `show_outputs: false` hides the fan / glow / pump row, and `show_estop: false` hides the emergency stop button.
+`cabin_temp: sensor.my_room_temperature` overrides the cabin temperature shown by the card (default: the heater's own cabin temperature sensor). Other options: `show_outputs: false` hides the fan / glow / pump row, and `show_estop: false` hides the emergency stop button.

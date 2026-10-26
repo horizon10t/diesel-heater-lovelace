@@ -166,8 +166,6 @@ const CARD_CSS = `
 
   /* 3. hero / 6. gauge share the big temperature block */
   [data-layout=hero] .hero-block, [data-layout=gauge] .hero-block { display:flex; }
-  [data-layout=hero] .tile.core, [data-layout=gauge] .tile.core { display:none; }
-  [data-layout=hero] .tiles, [data-layout=gauge] .tiles { grid-template-columns:1fr 1fr; }
   [data-layout=hero] .ring { width:auto; height:auto; background:none; border-radius:0; }
   [data-layout=hero] .ring-in { width:auto; height:auto; background:none; padding:6px 0; }
   [data-layout=hero] .big { font-size:3.8rem; font-weight:300; color:var(--st); }
@@ -321,7 +319,7 @@ class DieselHeaterCard extends HTMLElement {
           <div class="hero-block">
             <div class="ring"><div class="ring-in">
               <div class="big"><span id="bigCore">--</span><span class="u">°C</span></div>
-              <div class="ring-l">Core temp</div>
+              <div class="ring-l">Cabin temp</div>
             </div></div>
           </div>
           <div class="outputs">
@@ -457,8 +455,10 @@ class DieselHeaterCard extends HTMLElement {
     const coreRaw = this._num(c.core_temp);
     const core = coreRaw === null ? null : coreRaw.toFixed(1);
     $("#core").textContent = core ?? "--";
-    $("#bigCore").textContent = core ?? "--";
-    card.style.setProperty("--pct", coreRaw === null ? 0 : Math.max(0, Math.min(100, (coreRaw / 200) * 100)));
+    // Hero / gauge layouts feature the cabin temperature; ring spans 0-40 °C.
+    const cabinRaw = this._num(c.cabin_temp);
+    $("#bigCore").textContent = cabinRaw === null ? "--" : cabinRaw.toFixed(1);
+    card.style.setProperty("--pct", cabinRaw === null ? 0 : Math.max(0, Math.min(100, (cabinRaw / 40) * 100)));
     $(".tile.core").style.setProperty("--accent", state === "Running" || state === "Igniting" ? style.color : "inherit");
     $("#volt").textContent = this._num(c.voltage, 1) ?? "--";
     $("#amp").textContent = this._num(c.current, 1) ?? "--";
@@ -525,6 +525,7 @@ class DieselHeaterCardEditor extends HTMLElement {
       { name: "device", selector: { device: { integration: "diesel_heater" } } },
       { name: "layout", selector: { select: { mode: "dropdown", options: LAYOUTS } } },
       { name: "name", selector: { text: {} } },
+      { name: "cabin_temp", selector: { entity: { domain: "sensor", device_class: "temperature" } } },
       {
         type: "grid", name: "", schema: [
           { name: "show_outputs", selector: { boolean: {} } },
@@ -537,7 +538,7 @@ class DieselHeaterCardEditor extends HTMLElement {
         title: "Entity overrides (optional)",
         schema: [
           entity("status", "sensor"), entity("core_temp", "sensor"),
-          entity("cabin_temp", "sensor"), entity("voltage", "sensor"),
+          entity("voltage", "sensor"),
           entity("current", "sensor"), entity("mode", "select"),
           entity("power_level", "number"), entity("target", "number"),
           entity("power", "switch"), entity("estop", "button"),
@@ -557,15 +558,17 @@ class DieselHeaterCardEditor extends HTMLElement {
         device: "Heater", layout: "Layout", name: "Name (optional)",
         show_outputs: "Show fan / glow / pump", show_estop: "Show emergency stop",
         status: "Status sensor", core_temp: "Core temperature sensor",
-        cabin_temp: "Cabin temperature sensor", voltage: "Voltage sensor",
+        cabin_temp: "Cabin temperature sensor (optional)", voltage: "Voltage sensor",
         current: "Current sensor", mode: "Operating mode select",
         power_level: "Power level number", target: "Target temperature number",
         power: "Power switch", estop: "Emergency stop button",
         glow: "Glow plug on/off", fan: "Fan on/off", pump: "Fuel pump on/off",
         glow_out: "Glow plug output %", fan_out: "Fan output %", pump_rate: "Fuel pump rate (Hz)",
       }[s.name] || s.name);
-      this._form.computeHelper = (s) =>
-        s.name === "device" ? "Entities are found automatically from the selected heater." : "";
+      this._form.computeHelper = (s) => ({
+        device: "Entities are found automatically from the selected heater.",
+        cabin_temp: "Use any temperature sensor for the cabin reading. Leave empty to use the heater's own cabin temperature.",
+      }[s.name] || "");
       this._form.addEventListener("value-changed", (ev) => {
         const value = {};
         for (const [k, v] of Object.entries(ev.detail.value)) {
