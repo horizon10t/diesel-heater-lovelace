@@ -1,6 +1,6 @@
 # Diesel Heater Card
 
-A Lovelace card for the ESP32-S3 diesel heater controller.
+A Lovelace card for the [ESP32-S3 Diesel Heater Controller](https://deanfourie.me/product/diesel-heater-controller/).
 
 - Status, core temperature, volts and amps
 - **Fan, glow plug and fuel pump** output indicators (orange when active, like the controller WebUI)
@@ -71,3 +71,7 @@ Choose one in the card editor under **Layout** (or `layout:` in YAML).
 | `console` | Dark instrument-panel look |
 
 `cabin_temp: sensor.my_room_temperature` overrides the cabin temperature shown by the card (default: the heater's own cabin temperature sensor). Other options: `show_outputs: false` hides the fan / glow / pump row, and `show_estop: false` hides the emergency stop button.
+
+## The controller
+
+This works with the [Diesel Heater Controller](https://deanfourie.me/product/diesel-heater-controller/) from [deanfourie.me](https://deanfourie.me). See the product page for details, hardware and firmware.
