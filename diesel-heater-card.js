@@ -56,6 +56,7 @@ const ENTITY_SPEC = {
   glow_out: ["sensor", "_glow_plug_output"],
   fan_out: ["sensor", "_fan_output"],
   pump_rate: ["sensor", "_fuel_pump_rate"],
+  fault: ["sensor", "_fault_message"],
 };
 const DEFAULT_ENTITIES = {
   status: "sensor.diesel_heater_status",
@@ -74,6 +75,7 @@ const DEFAULT_ENTITIES = {
   glow_out: "sensor.diesel_heater_glow_plug_output",
   fan_out: "sensor.diesel_heater_fan_output",
   pump_rate: "sensor.diesel_heater_fuel_pump_rate",
+  fault: "sensor.diesel_heater_fault_message",
 };
 
 // Same icons the controller's WebUI dashboard uses.
@@ -144,7 +146,9 @@ const CARD_CSS = `
   .stop { background:#d32f2f; color:#fff; }
   .estop { background:#8e0000; color:#fff; box-shadow:inset 0 0 0 2px #ff5252; }
   .estop svg { width:18px; height:18px; }
-  .fault { padding:8px 12px; border-radius:10px; background:var(--error-color,#d32f2f); color:#fff; font-size:.85rem; }
+  .fault { padding:10px 12px; border-radius:10px; background:var(--error-color,#d32f2f); color:#fff; font-size:.85rem; }
+  .fault b { display:block; font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; opacity:.85; margin-bottom:3px; }
+  .fault span { display:block; white-space:pre-wrap; overflow-wrap:anywhere; user-select:text; }
   .unavail { opacity:.5; }
 
   /* 2. compact */
@@ -173,23 +177,25 @@ const CARD_CSS = `
   [data-layout=hero] .head { flex-direction:column; align-items:center; gap:4px; }
 
   /* 4. split */
-  [data-layout=split] .body { display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:start; }
-  [data-layout=split] .tiles { grid-column:1; grid-template-columns:1fr; gap:6px; }
+  [data-layout=split] .body { display:grid; grid-template-columns:1fr 1fr; column-gap:14px; row-gap:0; align-items:start;
+    grid-template-areas:"fault fault" "outputs controls" "tiles controls"; }
+  [data-layout=split] .tiles { grid-area:tiles; grid-template-columns:1fr; gap:6px; }
   [data-layout=split] .tile { display:flex; flex-direction:row-reverse; justify-content:space-between; align-items:center; text-align:left; padding:10px 12px; }
   [data-layout=split] .tile .l { margin:0; font-size:.85rem; }
-  [data-layout=split] .outputs { grid-column:1; gap:6px; }
+  [data-layout=split] .outputs { grid-area:outputs; gap:6px; margin-bottom:14px; }
   [data-layout=split] .out { padding:12px 2px 10px; }
   [data-layout=split] .out svg { width:32px; height:32px; flex-basis:32px; }
   [data-layout=split] .out b { font-size:.9rem; }
-  [data-layout=split] .controls { grid-column:2; grid-row:1 / span 3; }
-  [data-layout=split] .fault { grid-column:1 / -1; }
+  [data-layout=split] .controls { grid-area:controls; }
+  [data-layout=split] .fault { grid-area:fault; margin-bottom:14px; }
   [data-layout=split] .row { flex-wrap:wrap; }
   [data-layout=split] .row .lbl { flex:1 1 100%; }
   [data-layout=split] .row input[type=range] { min-width:50px; }
   [data-layout=split] .actions { flex-direction:column; }
   @container (max-width:430px) {
-    [data-layout=split] .body { grid-template-columns:1fr; }
-    [data-layout=split] .controls { grid-column:1; grid-row:auto; }
+    [data-layout=split] .body { grid-template-columns:1fr; grid-template-areas:"fault" "outputs" "tiles" "controls"; }
+    [data-layout=split] .tiles { margin-bottom:14px; }
+
   }
 
   /* 5. minimal */
@@ -316,6 +322,7 @@ class DieselHeaterCard extends HTMLElement {
           <div class="status"><ha-icon></ha-icon><span></span></div>
         </div>
         <div class="body">
+          <div class="fault" id="fault" hidden><b>Error</b><span id="faultText"></span></div>
           <div class="hero-block">
             <div class="ring"><div class="ring-in">
               <div class="big"><span id="bigCore">--</span><span class="u">°C</span></div>
@@ -359,7 +366,6 @@ class DieselHeaterCard extends HTMLElement {
               </button>
             </div>
           </div>
-          <div class="fault" id="fault" hidden></div>
         </div>
       </ha-card>`;
     this._root = this.shadowRoot;
@@ -499,10 +505,18 @@ class DieselHeaterCard extends HTMLElement {
     // Emergency stop is only offered while the heater is running.
     $("#estop").hidden = !(ACTIVE_STATES.includes(state) && h.states[c.estop] && cfg.show_estop !== false);
 
+    // The full current error. Shown whenever the controller reports one, which
+    // also covers an emergency stop (the heater is then cooling, not in Fault).
     const fault = $("#fault");
-    const msg = st && st.attributes ? st.attributes.fault : "";
-    fault.hidden = !(state === "Fault" && msg);
-    fault.textContent = msg || "";
+    const faultEntity = h.states[c.fault];
+    let msg = "";
+    if (faultEntity && !["none", "unknown", "unavailable", ""].includes(String(faultEntity.state).toLowerCase())) {
+      msg = (faultEntity.attributes && faultEntity.attributes.message) || faultEntity.state;
+    }
+    if (!msg && st && st.attributes && st.attributes.fault) msg = st.attributes.fault;
+    if (!msg && state === "Fault") msg = "Heater fault (no details reported)";
+    fault.hidden = !msg;
+    $("#faultText").textContent = msg;
   }
 }
 
@@ -544,7 +558,7 @@ class DieselHeaterCardEditor extends HTMLElement {
           entity("power", "switch"), entity("estop", "button"),
           entity("glow", "binary_sensor"), entity("fan", "binary_sensor"),
           entity("pump", "binary_sensor"), entity("glow_out", "sensor"),
-          entity("fan_out", "sensor"), entity("pump_rate", "sensor"),
+          entity("fan_out", "sensor"), entity("pump_rate", "sensor"), entity("fault", "sensor"),
         ],
       },
     ];
@@ -563,7 +577,7 @@ class DieselHeaterCardEditor extends HTMLElement {
         power_level: "Power level number", target: "Target temperature number",
         power: "Power switch", estop: "Emergency stop button",
         glow: "Glow plug on/off", fan: "Fan on/off", pump: "Fuel pump on/off",
-        glow_out: "Glow plug output %", fan_out: "Fan output %", pump_rate: "Fuel pump rate (Hz)",
+        glow_out: "Glow plug output %", fan_out: "Fan output %", pump_rate: "Fuel pump rate (Hz)", fault: "Fault message sensor",
       }[s.name] || s.name);
       this._form.computeHelper = (s) => ({
         device: "Entities are found automatically from the selected heater.",
