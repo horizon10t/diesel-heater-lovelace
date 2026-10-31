@@ -159,11 +159,17 @@ const CARD_CSS = `
   dialog.adjust { border:0; border-radius:16px; padding:20px; width:min(360px, calc(100vw - 32px));
     background:var(--card-background-color, #fff); color:var(--primary-text-color); box-shadow:0 8px 32px #0006; }
   dialog.adjust::backdrop { background:#0008; }
-  .visual { position:relative; height:128px; border-radius:14px; overflow:hidden; background:#000;
-    display:flex; justify-content:center; align-items:center; }
+  .visual { position:relative; height:128px; display:flex; justify-content:center; align-items:center; }
   .visual::before { content:""; position:absolute; inset:0;
-    background:radial-gradient(ellipse at 50% 100%, var(--st) 0%, transparent 65%); opacity:.28; }
-  .visual img { position:relative; height:100%; width:auto; display:block; }
+    background:radial-gradient(ellipse at 50% 100%, var(--st) 0%, transparent 65%); opacity:.22; }
+  /* The photo has a black background: on a dark card "screen" makes the black
+     vanish, and the soft mask fades the edges into the card. */
+  .visual img { position:relative; height:100%; width:auto; display:block; mix-blend-mode:screen;
+    -webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 50%, #000 62%, transparent 100%);
+    mask-image:radial-gradient(ellipse 50% 50% at 50% 50%, #000 62%, transparent 100%); }
+  /* On a light card a dark rounded panel looks better than a washed-out image. */
+  .visual.light { background:#000; border-radius:14px; overflow:hidden; }
+  .visual.light img { mix-blend-mode:normal; -webkit-mask-image:none; mask-image:none; }
   .adjust-head { display:flex; align-items:center; gap:16px; margin-bottom:6px; }
   .adjust-icon { flex:0 0 64px; width:64px; height:64px; border-radius:50%; display:grid; place-items:center;
     background:var(--secondary-background-color); color:var(--primary-color); }
@@ -587,6 +593,12 @@ class DieselHeaterCard extends HTMLElement {
     const cfg = this._config;
     // Heater image and popup icons are optional (off unless show_visuals: true).
     $(".visual").hidden = !cfg.show_visuals;
+    if (cfg.show_visuals) {
+      const m = (getComputedStyle($("ha-card")).backgroundColor || "").match(/\d+/g);
+      if (m && m.length >= 3) {
+        $(".visual").classList.toggle("light", (m[0] * 299 + m[1] * 587 + m[2] * 114) / 1000 > 140);
+      }
+    }
     $("#adjustIcon").hidden = !cfg.show_visuals;
     const st = h.states[c.status];
     const state = st ? st.state : "unavailable";
