@@ -7,9 +7,10 @@ A Lovelace card for the [ESP32-S3 Diesel Heater Controller](https://deanfourie.m
 - Thermostat / Power mode toggle with a **target / power-level slider and + / - buttons**
 - **Stop heater** and, while the heater is running, a red **Emergency stop** button
 - A prominent **error banner** with the full error message from the controller, shown as soon as there is an error (a fault or an emergency stop) and gone when it clears
+- A **Clear fault** button inside the error banner while the heater is in a fault. It does the same as the Clear button in the controller web interface, including waiting for the fault cooldown
 - **10 selectable layouts** chosen in the card editor
 
-It needs the **[Diesel Heater Controller integration](https://github.com/horizon10t/diesel-heater-ha) version 1.5.0 or newer** installed and set up first (the emergency stop button and output sensors come from it), and the controller firmware flashed with the latest version.
+It needs the **[Diesel Heater Controller integration](https://github.com/horizon10t/diesel-heater-ha) version 1.6.0 or newer** installed and set up first (the emergency stop and clear fault buttons and output sensors come from it), and the controller firmware flashed with the latest version.
 
 ## Screenshots
 

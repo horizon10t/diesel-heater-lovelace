@@ -11,7 +11,7 @@
  *   show_outputs: true       # fan / glow / pump indicators
  *   show_estop: true         # emergency stop while the heater is running
  *   # Optional entity overrides: status, core_temp, cabin_temp, voltage,
- *   # current, mode, power_level, target, power, estop, glow, fan, pump,
+ *   # current, mode, power_level, target, power, estop, clear_fault, glow, fan, pump,
  *   # glow_out, fan_out, pump_rate
  */
 const STATE_STYLE = {
@@ -49,7 +49,8 @@ const ENTITY_SPEC = {
   power_level: ["number", "_power_level"],
   target: ["number", "_target_temperature"],
   power: ["switch", ""],
-  estop: ["button", ""],
+  estop: ["button", "_emergency_stop"],
+  clear_fault: ["button", "_clear_fault"],
   glow: ["binary_sensor", "_glow_plug"],
   fan: ["binary_sensor", "_fan"],
   pump: ["binary_sensor", "_fuel_pump"],
@@ -69,6 +70,7 @@ const DEFAULT_ENTITIES = {
   target: "number.diesel_heater_target_temperature",
   power: "switch.diesel_heater_power",
   estop: "button.diesel_heater_emergency_stop",
+  clear_fault: "button.diesel_heater_clear_fault",
   glow: "binary_sensor.diesel_heater_glow_plug",
   fan: "binary_sensor.diesel_heater_fan",
   pump: "binary_sensor.diesel_heater_fuel_pump",
@@ -149,6 +151,8 @@ const CARD_CSS = `
   .fault { padding:10px 12px; border-radius:10px; background:var(--error-color,#d32f2f); color:#fff; font-size:.85rem; }
   .fault b { display:block; font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; opacity:.85; margin-bottom:3px; }
   .fault span { display:block; white-space:pre-wrap; overflow-wrap:anywhere; user-select:text; }
+  .fault button { margin-top:8px; border:1px solid #fff; border-radius:8px; padding:6px 12px; cursor:pointer; font:inherit; font-weight:600; background:rgba(255,255,255,.15); color:#fff; }
+  .fault button:hover { background:rgba(255,255,255,.3); }
   .unavail { opacity:.5; }
 
   /* 2. compact */
@@ -322,7 +326,7 @@ class DieselHeaterCard extends HTMLElement {
           <div class="status"><ha-icon></ha-icon><span></span></div>
         </div>
         <div class="body">
-          <div class="fault" id="fault" hidden><b>Error</b><span id="faultText"></span></div>
+          <div class="fault" id="fault" hidden><b>Error</b><span id="faultText"></span><button id="clearFault" hidden>Clear fault</button></div>
           <div class="hero-block">
             <div class="ring"><div class="ring-in">
               <div class="big"><span id="bigCore">--</span><span class="u">°C</span></div>
@@ -391,6 +395,8 @@ class DieselHeaterCard extends HTMLElement {
       const on = $("#toggle").dataset.on === "1";
       this._hass.callService("switch", on ? "turn_off" : "turn_on", { entity_id: this._ids.power });
     });
+    $("#clearFault").addEventListener("click", () =>
+      this._hass.callService("button", "press", { entity_id: this._ids.clear_fault }));
     $("#estop").addEventListener("click", () =>
       this._hass.callService("button", "press", { entity_id: this._ids.estop }));
     this._update();
@@ -517,6 +523,8 @@ class DieselHeaterCard extends HTMLElement {
     if (!msg && state === "Fault") msg = "Heater fault (no details reported)";
     fault.hidden = !msg;
     $("#faultText").textContent = msg;
+    // Clearing is only possible from a real fault, not while cooling after an emergency stop.
+    $("#clearFault").hidden = !(state === "Fault" && h.states[c.clear_fault]);
   }
 }
 
@@ -555,7 +563,7 @@ class DieselHeaterCardEditor extends HTMLElement {
           entity("voltage", "sensor"),
           entity("current", "sensor"), entity("mode", "select"),
           entity("power_level", "number"), entity("target", "number"),
-          entity("power", "switch"), entity("estop", "button"),
+          entity("power", "switch"), entity("estop", "button"), entity("clear_fault", "button"),
           entity("glow", "binary_sensor"), entity("fan", "binary_sensor"),
           entity("pump", "binary_sensor"), entity("glow_out", "sensor"),
           entity("fan_out", "sensor"), entity("pump_rate", "sensor"), entity("fault", "sensor"),
@@ -575,7 +583,7 @@ class DieselHeaterCardEditor extends HTMLElement {
         cabin_temp: "Cabin temperature sensor (optional)", voltage: "Voltage sensor",
         current: "Current sensor", mode: "Operating mode select",
         power_level: "Power level number", target: "Target temperature number",
-        power: "Power switch", estop: "Emergency stop button",
+        power: "Power switch", estop: "Emergency stop button", clear_fault: "Clear fault button",
         glow: "Glow plug on/off", fan: "Fan on/off", pump: "Fuel pump on/off",
         glow_out: "Glow plug output %", fan_out: "Fan output %", pump_rate: "Fuel pump rate (Hz)", fault: "Fault message sensor",
       }[s.name] || s.name);
