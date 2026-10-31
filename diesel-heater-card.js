@@ -10,6 +10,8 @@
  *                            # gauge | banner | accent | wide | console
  *   show_outputs: true       # fan / glow / pump indicators
  *   show_estop: true         # emergency stop while the heater is running
+ *   language: auto           # optional: de, fr, es, it, pt, nl, pl, ru, sv, cs, tr, ja, zh
+ *                            # (default: your Home Assistant language, else English)
  *   # Optional entity overrides: status, core_temp, cabin_temp, voltage,
  *   # current, mode, power_level, target, power, estop, clear_fault, glow, fan, pump,
  *   # glow_out, fan_out, pump_rate
@@ -24,6 +26,36 @@ const STATE_STYLE = {
   Fault:      { color: "var(--error-color, #d32f2f)", icon: "mdi:alert-octagon" },
 };
 const ACTIVE_STATES = ["Preheating", "Igniting", "Running", "Priming"];
+// Card text in the languages the controller app supports. English is the key.
+const I18N = {
+  de: {"Error":"Fehler","Clear fault":"Fehler löschen","Cabin temp":"Kabinentemp.","Fan":"Lüfter","Glow plug":"Glühkerze","Fuel pump":"Kraftstoffpumpe","Core temp":"Kerntemp.","Voltage":"Spannung","Current":"Strom","Thermostat":"Thermostat","Power":"Leistung","Target":"Soll","Offline":"Offline","On":"An","Off":"Aus","Stop heater":"Heizung stoppen","Start heater":"Heizung starten","Emergency stop":"Not-Aus","Heater fault (no details reported)":"Heizungsfehler (keine Details gemeldet)","Decrease target":"Soll verringern","Increase target":"Soll erhöhen","Decrease power level":"Leistungsstufe verringern","Increase power level":"Leistungsstufe erhöhen","Preheating":"Vorglühen","Igniting":"Zündung","Running":"Läuft","Cooling":"Abkühlen","Priming":"Befüllen","Fault":"Fehler","Fuel pump rate":"Kraftstoffpumpen-Rate","Fan speed":"Lüfterdrehzahl","Power level":"Leistungsstufe","Fan speed and fuel rate follow the power level in Power mode.":"Lüfterdrehzahl und Kraftstoffrate folgen im Leistungsmodus der Leistungsstufe.","Close":"Schließen"},
+  fr: {"Error":"Erreur","Clear fault":"Effacer le défaut","Cabin temp":"Temp. cabine","Fan":"Ventilateur","Glow plug":"Bougie de préchauffage","Fuel pump":"Pompe à carburant","Core temp":"Temp. cœur","Voltage":"Tension","Current":"Courant","Thermostat":"Thermostat","Power":"Puissance","Target":"Cible","Offline":"Hors ligne","On":"Marche","Off":"Arrêt","Stop heater":"Arrêter le chauffage","Start heater":"Démarrer le chauffage","Emergency stop":"Arrêt d'urgence","Heater fault (no details reported)":"Défaut du chauffage (aucun détail fourni)","Decrease target":"Diminuer la cible","Increase target":"Augmenter la cible","Decrease power level":"Diminuer le niveau de puissance","Increase power level":"Augmenter le niveau de puissance","Preheating":"Préchauffage","Igniting":"Allumage","Running":"En marche","Cooling":"Refroidissement","Priming":"Amorçage","Fault":"Défaut","Fuel pump rate":"Débit de la pompe à carburant","Fan speed":"Vitesse du ventilateur","Power level":"Niveau de puissance","Fan speed and fuel rate follow the power level in Power mode.":"La vitesse du ventilateur et le débit de carburant suivent le niveau de puissance en mode Puissance.","Close":"Fermer"},
+  es: {"Error":"Error","Clear fault":"Borrar fallo","Cabin temp":"Temp. cabina","Fan":"Ventilador","Glow plug":"Bujía incandescente","Fuel pump":"Bomba de combustible","Core temp":"Temp. núcleo","Voltage":"Voltaje","Current":"Corriente","Thermostat":"Termostato","Power":"Potencia","Target":"Objetivo","Offline":"Sin conexión","On":"Activado","Off":"Apagado","Stop heater":"Detener calefactor","Start heater":"Iniciar calefactor","Emergency stop":"Parada de emergencia","Heater fault (no details reported)":"Fallo del calefactor (sin detalles)","Decrease target":"Reducir objetivo","Increase target":"Aumentar objetivo","Decrease power level":"Reducir nivel de potencia","Increase power level":"Aumentar nivel de potencia","Preheating":"Precalentando","Igniting":"Encendiendo","Running":"En marcha","Cooling":"Enfriando","Priming":"Cebando","Fault":"Fallo","Fuel pump rate":"Caudal de la bomba de combustible","Fan speed":"Velocidad del ventilador","Power level":"Nivel de potencia","Fan speed and fuel rate follow the power level in Power mode.":"La velocidad del ventilador y el caudal de combustible siguen el nivel de potencia en modo Potencia.","Close":"Cerrar"},
+  it: {"Error":"Errore","Clear fault":"Cancella guasto","Cabin temp":"Temp. cabina","Fan":"Ventola","Glow plug":"Candeletta","Fuel pump":"Pompa carburante","Core temp":"Temp. nucleo","Voltage":"Tensione","Current":"Corrente","Thermostat":"Termostato","Power":"Potenza","Target":"Obiettivo","Offline":"Offline","On":"Acceso","Off":"Spento","Stop heater":"Ferma riscaldatore","Start heater":"Avvia riscaldatore","Emergency stop":"Arresto di emergenza","Heater fault (no details reported)":"Guasto del riscaldatore (nessun dettaglio)","Decrease target":"Diminuisci obiettivo","Increase target":"Aumenta obiettivo","Decrease power level":"Diminuisci livello di potenza","Increase power level":"Aumenta livello di potenza","Preheating":"Preriscaldamento","Igniting":"Accensione","Running":"In funzione","Cooling":"Raffreddamento","Priming":"Adescamento","Fault":"Guasto","Fuel pump rate":"Frequenza pompa carburante","Fan speed":"Velocità ventola","Power level":"Livello di potenza","Fan speed and fuel rate follow the power level in Power mode.":"Velocità della ventola e portata del carburante seguono il livello di potenza in modalità Potenza.","Close":"Chiudi"},
+  pt: {"Error":"Erro","Clear fault":"Limpar falha","Cabin temp":"Temp. cabine","Fan":"Ventoinha","Glow plug":"Vela incandescente","Fuel pump":"Bomba de combustível","Core temp":"Temp. núcleo","Voltage":"Tensão","Current":"Corrente","Thermostat":"Termóstato","Power":"Potência","Target":"Alvo","Offline":"Offline","On":"Ligado","Off":"Desligado","Stop heater":"Parar aquecedor","Start heater":"Iniciar aquecedor","Emergency stop":"Paragem de emergência","Heater fault (no details reported)":"Falha do aquecedor (sem detalhes)","Decrease target":"Diminuir alvo","Increase target":"Aumentar alvo","Decrease power level":"Diminuir nível de potência","Increase power level":"Aumentar nível de potência","Preheating":"Pré-aquecimento","Igniting":"A acender","Running":"Em funcionamento","Cooling":"A arrefecer","Priming":"Escorvamento","Fault":"Falha","Fuel pump rate":"Taxa da bomba de combustível","Fan speed":"Velocidade da ventoinha","Power level":"Nível de potência","Fan speed and fuel rate follow the power level in Power mode.":"A velocidade da ventoinha e a taxa de combustível seguem o nível de potência no modo Potência.","Close":"Fechar"},
+  nl: {"Error":"Fout","Clear fault":"Storing wissen","Cabin temp":"Cabinetemp.","Fan":"Ventilator","Glow plug":"Gloeibougie","Fuel pump":"Brandstofpomp","Core temp":"Kerntemp.","Voltage":"Spanning","Current":"Stroom","Thermostat":"Thermostaat","Power":"Vermogen","Target":"Doel","Offline":"Offline","On":"Aan","Off":"Uit","Stop heater":"Verwarming stoppen","Start heater":"Verwarming starten","Emergency stop":"Noodstop","Heater fault (no details reported)":"Storing verwarming (geen details gemeld)","Decrease target":"Doel verlagen","Increase target":"Doel verhogen","Decrease power level":"Vermogensniveau verlagen","Increase power level":"Vermogensniveau verhogen","Preheating":"Voorverwarmen","Igniting":"Ontsteking","Running":"Actief","Cooling":"Afkoelen","Priming":"Vullen","Fault":"Storing","Fuel pump rate":"Pompsnelheid brandstof","Fan speed":"Ventilatorsnelheid","Power level":"Vermogensniveau","Fan speed and fuel rate follow the power level in Power mode.":"Ventilatorsnelheid en brandstofdosering volgen het vermogensniveau in de vermogensmodus.","Close":"Sluiten"},
+  pl: {"Error":"Błąd","Clear fault":"Wyczyść usterkę","Cabin temp":"Temp. kabiny","Fan":"Wentylator","Glow plug":"Świeca żarowa","Fuel pump":"Pompa paliwa","Core temp":"Temp. rdzenia","Voltage":"Napięcie","Current":"Prąd","Thermostat":"Termostat","Power":"Moc","Target":"Cel","Offline":"Offline","On":"Wł.","Off":"Wył.","Stop heater":"Zatrzymaj nagrzewnicę","Start heater":"Uruchom nagrzewnicę","Emergency stop":"Zatrzymanie awaryjne","Heater fault (no details reported)":"Usterka nagrzewnicy (brak szczegółów)","Decrease target":"Zmniejsz cel","Increase target":"Zwiększ cel","Decrease power level":"Zmniejsz poziom mocy","Increase power level":"Zwiększ poziom mocy","Preheating":"Wstępne nagrzewanie","Igniting":"Zapłon","Running":"Pracuje","Cooling":"Chłodzenie","Priming":"Zalewanie","Fault":"Usterka","Fuel pump rate":"Częstotliwość pompy paliwa","Fan speed":"Prędkość wentylatora","Power level":"Poziom mocy","Fan speed and fuel rate follow the power level in Power mode.":"Prędkość wentylatora i dawka paliwa zależą od poziomu mocy w trybie Moc.","Close":"Zamknij"},
+  ru: {"Error":"Ошибка","Clear fault":"Сбросить неисправность","Cabin temp":"Темп. салона","Fan":"Вентилятор","Glow plug":"Свеча накаливания","Fuel pump":"Топливный насос","Core temp":"Темп. ядра","Voltage":"Напряжение","Current":"Ток","Thermostat":"Термостат","Power":"Мощность","Target":"Цель","Offline":"Не в сети","On":"Вкл.","Off":"Выкл.","Stop heater":"Остановить обогреватель","Start heater":"Запустить обогреватель","Emergency stop":"Аварийная остановка","Heater fault (no details reported)":"Неисправность обогревателя (нет подробностей)","Decrease target":"Уменьшить цель","Increase target":"Увеличить цель","Decrease power level":"Уменьшить уровень мощности","Increase power level":"Увеличить уровень мощности","Preheating":"Предпрогрев","Igniting":"Розжиг","Running":"Работает","Cooling":"Охлаждение","Priming":"Прокачка","Fault":"Неисправность","Fuel pump rate":"Частота топливного насоса","Fan speed":"Скорость вентилятора","Power level":"Уровень мощности","Fan speed and fuel rate follow the power level in Power mode.":"Скорость вентилятора и подача топлива следуют уровню мощности в режиме «Мощность».","Close":"Закрыть"},
+  sv: {"Error":"Fel","Clear fault":"Rensa fel","Cabin temp":"Hyttemp.","Fan":"Fläkt","Glow plug":"Glödstift","Fuel pump":"Bränslepump","Core temp":"Kärntemp.","Voltage":"Spänning","Current":"Ström","Thermostat":"Termostat","Power":"Effekt","Target":"Mål","Offline":"Offline","On":"På","Off":"Av","Stop heater":"Stoppa värmaren","Start heater":"Starta värmaren","Emergency stop":"Nödstopp","Heater fault (no details reported)":"Värmarfel (inga detaljer rapporterade)","Decrease target":"Sänk mål","Increase target":"Höj mål","Decrease power level":"Sänk effektnivå","Increase power level":"Höj effektnivå","Preheating":"Förvärmer","Igniting":"Tänder","Running":"Igång","Cooling":"Kyler","Priming":"Primar","Fault":"Fel","Fuel pump rate":"Bränslepumpens takt","Fan speed":"Fläkthastighet","Power level":"Effektnivå","Fan speed and fuel rate follow the power level in Power mode.":"Fläkthastighet och bränslemängd följer effektnivån i effektläget.","Close":"Stäng"},
+  cs: {"Error":"Chyba","Clear fault":"Smazat poruchu","Cabin temp":"Teplota kabiny","Fan":"Ventilátor","Glow plug":"Žhavicí svíčka","Fuel pump":"Palivové čerpadlo","Core temp":"Teplota jádra","Voltage":"Napětí","Current":"Proud","Thermostat":"Termostat","Power":"Výkon","Target":"Cíl","Offline":"Offline","On":"Zap.","Off":"Vyp.","Stop heater":"Zastavit topení","Start heater":"Spustit topení","Emergency stop":"Nouzové zastavení","Heater fault (no details reported)":"Porucha topení (bez podrobností)","Decrease target":"Snížit cíl","Increase target":"Zvýšit cíl","Decrease power level":"Snížit úroveň výkonu","Increase power level":"Zvýšit úroveň výkonu","Preheating":"Předehřev","Igniting":"Zapalování","Running":"Běží","Cooling":"Chlazení","Priming":"Plnění","Fault":"Porucha","Fuel pump rate":"Frekvence palivového čerpadla","Fan speed":"Rychlost ventilátoru","Power level":"Úroveň výkonu","Fan speed and fuel rate follow the power level in Power mode.":"Rychlost ventilátoru a dávkování paliva se řídí úrovní výkonu v režimu Výkon.","Close":"Zavřít"},
+  tr: {"Error":"Hata","Clear fault":"Arızayı temizle","Cabin temp":"Kabin sıc.","Fan":"Fan","Glow plug":"Kızdırma bujisi","Fuel pump":"Yakıt pompası","Core temp":"Çekirdek sıc.","Voltage":"Gerilim","Current":"Akım","Thermostat":"Termostat","Power":"Güç","Target":"Hedef","Offline":"Çevrimdışı","On":"Açık","Off":"Kapalı","Stop heater":"Isıtıcıyı durdur","Start heater":"Isıtıcıyı başlat","Emergency stop":"Acil durdurma","Heater fault (no details reported)":"Isıtıcı arızası (ayrıntı bildirilmedi)","Decrease target":"Hedefi azalt","Increase target":"Hedefi artır","Decrease power level":"Güç seviyesini azalt","Increase power level":"Güç seviyesini artır","Preheating":"Ön ısıtma","Igniting":"Ateşleme","Running":"Çalışıyor","Cooling":"Soğutuyor","Priming":"Dolduruluyor","Fault":"Arıza","Fuel pump rate":"Yakıt pompası hızı","Fan speed":"Fan hızı","Power level":"Güç seviyesi","Fan speed and fuel rate follow the power level in Power mode.":"Güç modunda fan hızı ve yakıt miktarı güç seviyesini izler.","Close":"Kapat"},
+  ja: {"Error":"エラー","Clear fault":"故障を解除","Cabin temp":"室温","Fan":"ファン","Glow plug":"グロープラグ","Fuel pump":"燃料ポンプ","Core temp":"コア温度","Voltage":"電圧","Current":"電流","Thermostat":"サーモスタット","Power":"パワー","Target":"目標","Offline":"オフライン","On":"オン","Off":"オフ","Stop heater":"ヒーターを停止","Start heater":"ヒーターを開始","Emergency stop":"緊急停止","Heater fault (no details reported)":"ヒーターの故障（詳細なし）","Decrease target":"目標を下げる","Increase target":"目標を上げる","Decrease power level":"パワーレベルを下げる","Increase power level":"パワーレベルを上げる","Preheating":"予熱中","Igniting":"点火中","Running":"運転中","Cooling":"冷却中","Priming":"燃料充填中","Fault":"故障","Fuel pump rate":"燃料ポンプ流量","Fan speed":"ファン速度","Power level":"パワーレベル","Fan speed and fuel rate follow the power level in Power mode.":"パワーモードでは、ファン速度と燃料流量はパワーレベルに従います。","Close":"閉じる"},
+  zh: {"Error":"错误","Clear fault":"清除故障","Cabin temp":"舱内温度","Fan":"风扇","Glow plug":"电热塞","Fuel pump":"燃油泵","Core temp":"核心温度","Voltage":"电压","Current":"电流","Thermostat":"恒温","Power":"功率","Target":"目标","Offline":"离线","On":"开","Off":"关","Stop heater":"停止加热器","Start heater":"启动加热器","Emergency stop":"紧急停止","Heater fault (no details reported)":"加热器故障（无详细信息）","Decrease target":"降低目标","Increase target":"提高目标","Decrease power level":"降低功率等级","Increase power level":"提高功率等级","Preheating":"预热中","Igniting":"点火中","Running":"运行中","Cooling":"冷却中","Priming":"燃油预充","Fault":"故障","Fuel pump rate":"燃油泵速率","Fan speed":"风扇转速","Power level":"功率等级","Fan speed and fuel rate follow the power level in Power mode.":"在功率模式下，风扇转速和燃油量跟随功率等级。","Close":"关闭"},
+};
+const LANGUAGES = Object.keys(I18N);
+
+// Picks the card language: the card's own `language` option, otherwise the
+// Home Assistant user language. Anything unsupported falls back to English.
+function cardLanguage(hass, cfg) {
+  const own = cfg && cfg.language && cfg.language !== "auto" ? cfg.language : "";
+  const raw = String(own || (hass && hass.language) || "en").toLowerCase();
+  const base = raw.split(/[-_]/)[0];
+  return LANGUAGES.includes(base) ? base : "en";
+}
+function translate(lang, text) {
+  const table = I18N[lang];
+  return (table && table[text]) || text;
+}
 
 const LAYOUTS = [
   { value: "classic", label: "1. Classic - stacked tiles" },
@@ -40,24 +72,24 @@ const LAYOUTS = [
 
 // [domain, entity id suffix] used to find each entity on the selected heater.
 const ENTITY_SPEC = {
-  status: ["sensor", "_status"],
-  core_temp: ["sensor", "_core_temperature"],
-  cabin_temp: ["sensor", "_cabin_temperature"],
-  voltage: ["sensor", "_voltage"],
-  current: ["sensor", "_current"],
-  mode: ["select", ""],
-  power_level: ["number", "_power_level"],
-  target: ["number", "_target_temperature"],
-  power: ["switch", ""],
-  estop: ["button", "_emergency_stop"],
-  clear_fault: ["button", "_clear_fault"],
-  glow: ["binary_sensor", "_glow_plug"],
-  fan: ["binary_sensor", "_fan"],
-  pump: ["binary_sensor", "_fuel_pump"],
-  glow_out: ["sensor", "_glow_plug_output"],
-  fan_out: ["sensor", "_fan_output"],
-  pump_rate: ["sensor", "_fuel_pump_rate"],
-  fault: ["sensor", "_fault_message"],
+  status: ["sensor", "_status", "status"],
+  core_temp: ["sensor", "_core_temperature", "core_temperature"],
+  cabin_temp: ["sensor", "_cabin_temperature", "cabin_temperature"],
+  voltage: ["sensor", "_voltage", "voltage"],
+  current: ["sensor", "_current", "current"],
+  mode: ["select", "", "operating_mode"],
+  power_level: ["number", "_power_level", "power_level"],
+  target: ["number", "_target_temperature", "target_temperature"],
+  power: ["switch", "", "power"],
+  estop: ["button", "_emergency_stop", "emergency_stop"],
+  clear_fault: ["button", "_clear_fault", "clear_fault"],
+  glow: ["binary_sensor", "_glow_plug", "glow_on"],
+  fan: ["binary_sensor", "_fan", "fan_on"],
+  pump: ["binary_sensor", "_fuel_pump", "pump_on"],
+  glow_out: ["sensor", "_glow_plug_output", "glow_output"],
+  fan_out: ["sensor", "_fan_output", "fan_output"],
+  pump_rate: ["sensor", "_fuel_pump_rate", "pump_rate"],
+  fault: ["sensor", "_fault_message", "fault_message"],
 };
 const DEFAULT_ENTITIES = {
   status: "sensor.diesel_heater_status",
@@ -115,6 +147,18 @@ const CARD_CSS = `
   .tile .u { font-size:.8rem; font-weight:400; color:var(--secondary-text-color); margin-left:2px; }
   .tile .l { font-size:.75rem; color:var(--secondary-text-color); margin-top:2px; }
   .tile.core .v { color:var(--accent, inherit); }
+  [data-more], [data-adjust] { cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  [data-more]:focus-visible, [data-adjust]:focus-visible { outline:2px solid var(--primary-color); outline-offset:2px; }
+  .tile[data-more]:hover, .out[data-adjust]:hover, .out[data-more]:hover { filter:brightness(1.08); }
+
+  dialog.adjust { border:0; border-radius:16px; padding:20px; width:min(360px, calc(100vw - 32px));
+    background:var(--card-background-color, #fff); color:var(--primary-text-color); box-shadow:0 8px 32px #0006; }
+  dialog.adjust::backdrop { background:#0008; }
+  .adjust h3 { margin:0 0 4px; font-size:1.1rem; font-weight:500; }
+  .adjust .now { font-size:2.2rem; font-weight:600; margin:8px 0 16px; }
+  .adjust .hint { margin:14px 0 0; font-size:.8rem; color:var(--secondary-text-color); }
+  .adjust .close { margin-top:16px; width:100%; border:0; border-radius:10px; padding:10px; cursor:pointer; font:inherit;
+    font-weight:500; background:var(--secondary-background-color); color:var(--primary-text-color); }
 
   .outputs { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
   .out { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:18px 6px 14px;
@@ -299,7 +343,12 @@ class DieselHeaterCard extends HTMLElement {
     if (hass && deviceId && hass.entities) {
       const mine = Object.values(hass.entities).filter(
         (e) => e.device_id === deviceId && !e.entity_category);
-      for (const [key, [domain, suffix]] of Object.entries(ENTITY_SPEC)) {
+      // Entity ids follow the Home Assistant language, so match on the entity's
+      // translation key first and fall back to the English id suffix.
+      const all = Object.values(hass.entities).filter((e) => e.device_id === deviceId);
+      for (const [key, [domain, suffix, translationKey]] of Object.entries(ENTITY_SPEC)) {
+        const byKey = all.find((e) => e.translation_key === translationKey && e.entity_id.startsWith(domain + "."));
+        if (byKey) { found[key] = byKey.entity_id; continue; }
         const match = mine.find((e) => e.entity_id.startsWith(domain + ".") && e.entity_id.endsWith(suffix));
         if (match) found[key] = match.entity_id;
       }
@@ -326,54 +375,87 @@ class DieselHeaterCard extends HTMLElement {
           <div class="status"><ha-icon></ha-icon><span></span></div>
         </div>
         <div class="body">
-          <div class="fault" id="fault" hidden><b>Error</b><span id="faultText"></span><button id="clearFault" hidden>Clear fault</button></div>
+          <div class="fault" id="fault" hidden><b data-t="Error">Error</b><span id="faultText"></span><button id="clearFault" data-t="Clear fault" hidden>Clear fault</button></div>
           <div class="hero-block">
             <div class="ring"><div class="ring-in">
               <div class="big"><span id="bigCore">--</span><span class="u">°C</span></div>
-              <div class="ring-l">Cabin temp</div>
+              <div class="ring-l" data-t="Cabin temp">Cabin temp</div>
             </div></div>
           </div>
           <div class="outputs">
-            <div class="out" id="outFan">${ICON_FAN}<div><b>0%</b><small>Fan</small></div></div>
-            <div class="out" id="outGlow">${ICON_GLOW}<div><b>Off</b><small>Glow plug</small></div></div>
-            <div class="out" id="outPump">${ICON_PUMP}<div><b>0.00 Hz</b><small>Fuel pump</small></div></div>
+            <div class="out" id="outFan" data-adjust="fan" role="button" tabindex="0">${ICON_FAN}<div><b>0%</b><small data-t="Fan">Fan</small></div></div>
+            <div class="out" id="outGlow" data-more="glow" role="button" tabindex="0">${ICON_GLOW}<div><b>Off</b><small data-t="Glow plug">Glow plug</small></div></div>
+            <div class="out" id="outPump" data-adjust="pump" role="button" tabindex="0">${ICON_PUMP}<div><b>0.00 Hz</b><small data-t="Fuel pump">Fuel pump</small></div></div>
           </div>
           <div class="tiles">
-            <div class="tile core"><div><span class="v" id="core">--</span><span class="u">°C</span></div><div class="l">Core temp</div></div>
-            <div class="tile"><div><span class="v" id="volt">--</span><span class="u">V</span></div><div class="l">Voltage</div></div>
-            <div class="tile"><div><span class="v" id="amp">--</span><span class="u">A</span></div><div class="l">Current</div></div>
+            <div class="tile core" data-more="core_temp" role="button" tabindex="0"><div><span class="v" id="core">--</span><span class="u">°C</span></div><div class="l" data-t="Core temp">Core temp</div></div>
+            <div class="tile" data-more="voltage" role="button" tabindex="0"><div><span class="v" id="volt">--</span><span class="u">V</span></div><div class="l" data-t="Voltage">Voltage</div></div>
+            <div class="tile" data-more="current" role="button" tabindex="0"><div><span class="v" id="amp">--</span><span class="u">A</span></div><div class="l" data-t="Current">Current</div></div>
           </div>
           <div class="controls">
             <div class="seg">
-              <button data-mode="Thermostat">Thermostat</button>
-              <button data-mode="Power">Power</button>
+              <button data-mode="Thermostat" data-t="Thermostat">Thermostat</button>
+              <button data-mode="Power" data-t="Power">Power</button>
             </div>
             <div class="row" id="thermoRow">
-              <span class="lbl">Target</span>
-              <button class="step" data-key="target" data-dir="-1" aria-label="Decrease target">&minus;</button>
+              <span class="lbl" data-t="Target">Target</span>
+              <button class="step" data-key="target" data-dir="-1" aria-label="Decrease target" data-ta="Decrease target">&minus;</button>
               <input type="range" id="targetSlider" min="5" max="35" step="1">
-              <button class="step" data-key="target" data-dir="1" aria-label="Increase target">+</button>
+              <button class="step" data-key="target" data-dir="1" aria-label="Increase target" data-ta="Increase target">+</button>
               <span class="val" id="targetVal"></span>
             </div>
             <div class="row" id="powerRow">
-              <span class="lbl">Power</span>
-              <button class="step" data-key="power_level" data-dir="-1" aria-label="Decrease power level">&minus;</button>
+              <span class="lbl" data-t="Power">Power</span>
+              <button class="step" data-key="power_level" data-dir="-1" aria-label="Decrease power level" data-ta="Decrease power level">&minus;</button>
               <input type="range" id="levelSlider" min="1" max="10" step="1">
-              <button class="step" data-key="power_level" data-dir="1" aria-label="Increase power level">+</button>
+              <button class="step" data-key="power_level" data-dir="1" aria-label="Increase power level" data-ta="Increase power level">+</button>
               <span class="val" id="levelVal"></span>
             </div>
             <div class="actions">
               <button id="toggle"></button>
               <button id="estop" class="estop" hidden>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2h8l6 6v8l-6 6H8l-6-6V8z"/><path d="M12 7v6M12 16.5v.5"/></svg>
-                Emergency stop
+                <span data-t="Emergency stop">Emergency stop</span>
               </button>
             </div>
           </div>
         </div>
-      </ha-card>`;
+      </ha-card>
+      <dialog class="adjust" id="adjust">
+        <h3 id="adjustTitle"></h3>
+        <div class="now" id="adjustNow"></div>
+        <div class="row">
+          <span class="lbl" data-t="Power level">Power level</span>
+          <button class="step" data-key="power_level" data-dir="-1" aria-label="Decrease power level" data-ta="Decrease power level">&minus;</button>
+          <input type="range" id="adjustSlider" min="1" max="10" step="1">
+          <button class="step" data-key="power_level" data-dir="1" aria-label="Increase power level" data-ta="Increase power level">+</button>
+          <span class="val" id="adjustVal"></span>
+        </div>
+        <p class="hint" data-t="Fan speed and fuel rate follow the power level in Power mode.">Fan speed and fuel rate follow the power level in Power mode.</p>
+        <button class="close" id="adjustClose" data-t="Close">Close</button>
+      </dialog>`;
     this._root = this.shadowRoot;
     const $ = (s) => this._root.querySelector(s);
+
+    // Glow plug, core temperature, voltage and current open the usual more-info dialog.
+    this._root.querySelectorAll("[data-more]").forEach((el) => {
+      const open = () => this.dispatchEvent(new CustomEvent("hass-more-info", {
+        detail: { entityId: this._ids[el.dataset.more] }, bubbles: true, composed: true }));
+      el.addEventListener("click", open);
+      el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+    });
+    // Fan and fuel pump open a popup that steps the power level, which drives both.
+    this._root.querySelectorAll("[data-adjust]").forEach((el) => {
+      const open = () => this._openAdjust(el.dataset.adjust);
+      el.addEventListener("click", open);
+      el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+    });
+    const dlg = $("#adjust"), slider = $("#adjustSlider");
+    $("#adjustClose").addEventListener("click", () => dlg.close());
+    dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
+    dlg.addEventListener("close", () => { this._adjusting = null; });
+    slider.addEventListener("input", () => { this._dragging = "power_level"; $("#adjustVal").textContent = slider.value; });
+    slider.addEventListener("change", () => { this._dragging = null; this._commit("power_level", Number(slider.value)); });
 
     this._root.querySelectorAll(".seg button").forEach((b) =>
       b.addEventListener("click", () =>
@@ -418,8 +500,18 @@ class DieselHeaterCard extends HTMLElement {
     const next = Math.min(max, Math.max(min, Number(el.value) + dir * step));
     el.value = next;
     this._root.querySelector(valSel).textContent = next + suffix;
+    if (key === "power_level") {
+      this._root.querySelector("#adjustSlider").value = next;
+      this._root.querySelector("#adjustVal").textContent = next;
+    }
     clearTimeout(this._pending[key]);
     this._pending[key] = setTimeout(() => { delete this._pending[key]; this._commit(key, next); }, 350);
+  }
+
+  _openAdjust(kind) {
+    this._adjusting = kind;
+    this._update();
+    this._root.querySelector("#adjust").showModal();
   }
 
   _commit(key, value) {
@@ -446,6 +538,13 @@ class DieselHeaterCard extends HTMLElement {
   _update() {
     if (!this._hass || !this._config) return;
     const h = this._hass, $ = (s) => this._root.querySelector(s);
+    const lang = cardLanguage(h, this._config);
+    const t = (s) => translate(lang, s);
+    if (this._lang !== lang) {
+      this._lang = lang;
+      this._root.querySelectorAll("[data-t]").forEach((el) => { el.textContent = translate(lang, el.dataset.t); });
+      this._root.querySelectorAll("[data-ta]").forEach((el) => el.setAttribute("aria-label", translate(lang, el.dataset.ta)));
+    }
     const c = this._ids = this._entities();
     const cfg = this._config;
     const st = h.states[c.status];
@@ -461,7 +560,7 @@ class DieselHeaterCard extends HTMLElement {
     $(".title").textContent = cfg.name || this._deviceName() || "Diesel Heater";
     const statusEl = $(".status");
     statusEl.querySelector("ha-icon").setAttribute("icon", style.icon);
-    statusEl.querySelector("span").textContent = state === "unavailable" ? "Offline" : state;
+    statusEl.querySelector("span").textContent = t(state === "unavailable" ? "Offline" : state);
     $(".body").classList.toggle("unavail", !st || state === "unavailable");
 
     const coreRaw = this._num(c.core_temp);
@@ -478,9 +577,9 @@ class DieselHeaterCard extends HTMLElement {
     // Output states (fan / glow plug / fuel pump)
     $(".outputs").hidden = cfg.show_outputs === false;
     const fanPct = this._num(c.fan_out), pumpHz = this._num(c.pump_rate), glowPct = this._num(c.glow_out);
-    this._setOutput("#outFan", this._isOn(c.fan), fanPct === null ? (this._isOn(c.fan) ? "On" : "Off") : Math.round(fanPct) + "%");
+    this._setOutput("#outFan", this._isOn(c.fan), fanPct === null ? t(this._isOn(c.fan) ? "On" : "Off") : Math.round(fanPct) + "%");
     this._setOutput("#outGlow", this._isOn(c.glow),
-      this._isOn(c.glow) ? (glowPct !== null && glowPct < 100 ? Math.round(glowPct) + "%" : "On") : "Off");
+      this._isOn(c.glow) ? (glowPct !== null && glowPct < 100 ? Math.round(glowPct) + "%" : t("On")) : t("Off"));
     this._setOutput("#outPump", this._isOn(c.pump), (pumpHz === null ? 0 : pumpHz).toFixed(2) + " Hz");
 
     const modeState = h.states[c.mode] ? h.states[c.mode].state : "";
@@ -500,11 +599,25 @@ class DieselHeaterCard extends HTMLElement {
       if (v !== null) { el.value = v; $(valSel).textContent = v + suffix; }
     }
 
+    // Fan / fuel pump popup: live reading plus the shared power level control.
+    if (this._adjusting) {
+      $("#adjustTitle").textContent = t(this._adjusting === "fan" ? "Fan speed" : "Fuel pump rate");
+      $("#adjustNow").textContent = this._adjusting === "fan"
+        ? (fanPct === null ? "--" : Math.round(fanPct) + "%")
+        : (pumpHz === null ? "--" : pumpHz.toFixed(2) + " Hz");
+    }
+    if (this._dragging !== "power_level" && !this._pending.power_level) {
+      const ds = $("#adjustSlider"), { min, max, step } = this._range("power_level");
+      ds.min = min; ds.max = max; ds.step = step;
+      ds.value = $("#levelSlider").value;
+      $("#adjustVal").textContent = $("#levelSlider").value;
+    }
+
     const sw = h.states[c.power];
     const isOn = !!sw && sw.state === "on";
     const btn = $("#toggle");
     btn.dataset.on = isOn ? "1" : "0";
-    btn.textContent = isOn ? "Stop heater" : "Start heater";
+    btn.textContent = t(isOn ? "Stop heater" : "Start heater");
     btn.className = isOn ? "stop" : "start";
     btn.disabled = !sw || (state === "Cooling" && !isOn);
 
@@ -520,7 +633,7 @@ class DieselHeaterCard extends HTMLElement {
       msg = (faultEntity.attributes && faultEntity.attributes.message) || faultEntity.state;
     }
     if (!msg && st && st.attributes && st.attributes.fault) msg = st.attributes.fault;
-    if (!msg && state === "Fault") msg = "Heater fault (no details reported)";
+    if (!msg && state === "Fault") msg = t("Heater fault (no details reported)");
     fault.hidden = !msg;
     $("#faultText").textContent = msg;
     // Clearing is only possible from a real fault, not while cooling after an emergency stop.

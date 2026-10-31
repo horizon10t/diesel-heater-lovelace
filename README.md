@@ -8,6 +8,8 @@ A Lovelace card for the [ESP32-S3 Diesel Heater Controller](https://deanfourie.m
 - **Stop heater** and, while the heater is running, a red **Emergency stop** button
 - A prominent **error banner** with the full error message from the controller, shown as soon as there is an error (a fault or an emergency stop) and gone when it clears
 - A **Clear fault** button inside the error banner while the heater is in a fault. It does the same as the Clear button in the controller web interface, including waiting for the fault cooldown
+- **Tap for details:** tapping **Glow plug**, **Core temp**, **Voltage** or **Current** opens the normal Home Assistant more-info dialog (history graph and settings) for that entity. Tapping **Fan** or **Fuel pump** opens a popup showing the live fan speed or fuel pump rate with a power level slider and − / + buttons. The fan speed and fuel rate are both set by the power level, so the popup adjusts that, and it takes effect in Power mode
+- **Languages:** the card text follows your Home Assistant language: German, French, Spanish, Italian, Portuguese, Dutch, Polish, Russian, Swedish, Czech, Turkish, Japanese and Chinese (Simplified), otherwise English. Set `language: de` (or another code) in the card YAML to force one. Error messages are shown exactly as the controller reports them, so they stay in English
 - **10 selectable layouts** chosen in the card editor
 
 It needs the **[Diesel Heater Controller integration](https://github.com/horizon10t/diesel-heater-ha) version 1.6.0 or newer** installed and set up first (the emergency stop and clear fault buttons and output sensors come from it), and the controller firmware flashed with the latest version.
