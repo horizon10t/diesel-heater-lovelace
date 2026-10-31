@@ -74,7 +74,7 @@ Choose one in the card editor under **Layout** (or `layout:` in YAML).
 | `wide` | Horizontal strip (best on full-width cards) |
 | `console` | Dark instrument-panel look |
 
-`cabin_temp: sensor.my_room_temperature` overrides the cabin temperature shown by the card (default: the heater's own cabin temperature sensor). Other options: `show_outputs: false` hides the fan / glow / pump row, and `show_estop: false` hides the emergency stop button.
+`cabin_temp: sensor.my_room_temperature` overrides the cabin temperature shown by the card (default: the heater's own cabin temperature sensor). Other options: `show_outputs: false` hides the fan / glow / pump row, `show_estop: false` hides the emergency stop button, and `show_visuals: true` adds a picture of the heater at the top of the card and a fan / fuel pump icon in the two popups (off by default; also a toggle in the card editor). Tip: the fan speed and fuel pump rate popups use `fan_set` and `pump_set` if you need to point the card at specific entities.
 
 ## The controller
 
