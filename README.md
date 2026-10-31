@@ -16,11 +16,17 @@ It needs the **[Diesel Heater Controller integration](https://github.com/horizon
 
 ## Screenshots
 
-<!-- Replace the three files in the images/ folder with your screenshots (keep the same file names). -->
+<!-- The images live in the images/ folder (screenshot_1.png to screenshot_5.png). -->
 
 | Screenshot 1 | Screenshot 2 | Screenshot 3 |
 |---|---|---|
 | ![Screenshot 1](https://raw.githubusercontent.com/horizon10t/diesel-heater-lovelace/main/images/screenshot_1.png) | ![Screenshot 2](https://raw.githubusercontent.com/horizon10t/diesel-heater-lovelace/main/images/screenshot_2.png) | ![Screenshot 3](https://raw.githubusercontent.com/horizon10t/diesel-heater-lovelace/main/images/screenshot_3.png) |
+
+With `show_visuals: true`, the card shows a picture of the heater at the top, and the fan speed and fuel pump rate popups (opened by tapping **Fan** or **Fuel pump**) get a matching icon:
+
+| Heater image | Fan speed popup |
+|---|---|
+| ![Heater image on the card](https://raw.githubusercontent.com/horizon10t/diesel-heater-lovelace/main/images/screenshot_4.png) | ![Fan speed popup](https://raw.githubusercontent.com/horizon10t/diesel-heater-lovelace/main/images/screenshot_5.png) |
 
 ## Install with HACS
 
