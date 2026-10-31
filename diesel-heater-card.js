@@ -160,8 +160,6 @@ const CARD_CSS = `
     background:var(--card-background-color, #fff); color:var(--primary-text-color); box-shadow:0 8px 32px #0006; }
   dialog.adjust::backdrop { background:#0008; }
   .visual { position:relative; height:128px; display:flex; justify-content:center; align-items:center; }
-  .visual::before { content:""; position:absolute; inset:0;
-    background:radial-gradient(ellipse at 50% 100%, var(--st) 0%, transparent 65%); opacity:.22; }
   /* The photo has a black background: on a dark card "screen" makes the black
      vanish, and the soft mask fades the edges into the card. */
   .visual img { position:relative; height:100%; width:auto; display:block; mix-blend-mode:screen;
