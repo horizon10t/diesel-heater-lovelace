@@ -628,7 +628,14 @@ class DieselHeaterCard extends HTMLElement {
         : (pumpHz === null ? "--" : pumpHz.toFixed(2) + " Hz");
     }
     if (this._adjusting) {
-      const key = this._adjustKey(), ds = $("#adjustSlider"), { min, max, step } = this._range(key);
+      const key = this._adjustKey(), ds = $("#adjustSlider");
+      // If the usual lookup missed, take any number entity with the expected name ending.
+      if (!h.states[c[key]]) {
+        const tail = ENTITY_SPEC[key][1];
+        const alt = Object.keys(h.states).find((id) => id.startsWith("number.") && id.endsWith(tail));
+        if (alt) c[key] = alt;
+      }
+      const { min, max, step } = this._range(key);
       // The slider is always shown; it is disabled (with the reason) when the
       // entity is missing (older integration) or the heater is not in Power mode.
       const exists = !!h.states[c[key]] && h.states[c[key]].state !== "unavailable";
@@ -638,7 +645,8 @@ class DieselHeaterCard extends HTMLElement {
       $("#adjustRow").style.opacity = exists && inPower ? "" : ".5";
       const hint = $("#adjustHint");
       hint.hidden = exists && inPower;
-      hint.textContent = t(exists ? "Only available in Power mode." : "Not available yet: update the Diesel Heater integration and the controller firmware.");
+      hint.textContent = exists ? t("Only available in Power mode.")
+        : t("Not available yet: update the Diesel Heater integration and the controller firmware.") + " (" + c[key] + ")";
       if (this._dragging !== key && !this._pending[key]) {
         const v = this._num(c[key]);
         if (v !== null) { ds.value = v; $("#adjustVal").textContent = this._adjustText(v); }
